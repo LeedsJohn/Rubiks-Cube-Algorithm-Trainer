@@ -41,6 +41,13 @@ class wrongBox():
                 minTurns = self.algorithms[algorithm]
                 minAlgorithm = algorithm
         return minAlgorithm
+
+    def getRandomAlg(self):
+        """
+        getRandomAlg
+        Returns a random algorithm
+        """
+        return self.algorithms[random.choice(list(self.algorithms.keys()))]
         
     def length(self):
         """
