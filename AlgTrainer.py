@@ -33,6 +33,7 @@ BOX_2_PERCENTAGE = 70
 class AlgTrainer:
     def __init__(self, file_path):
         self.boxes = self._createBoxes(file_path)
+        self._initialAlgs()
         # self.lastAlg = "" TODO add in this
 
     def playRound(self):
@@ -50,6 +51,9 @@ class AlgTrainer:
         print(alg.getScramble())
         incorrect = input(
             "Enter any character if you got the algorithm wrong: ")
+        if incorrect == "X":
+            return True
+
         if incorrect:
             self.boxes[box].erase(alg)
             alg.reset()
@@ -168,13 +172,19 @@ class AlgTrainer:
         Loads the algorithms from file_path
         Creates the boxes and fills box 2 with up to 8 algorithms
         """
-        boxes = [Box for i in range(6)]
+        boxes = [Box.Box for i in range(6)]
         algs = {}
         with open(file_path) as f:
             algs = json.load(f)
-
         for alg in algs:
-            self.boxes[0].add(Algorithm(alg, algs[alg]))
+            boxes[0].add(Algorithm.Algorithm(alg, algs[alg]))
+        return boxes
 
-        for i in range(min(self.boxes[0].length(), 8)):
+    def _initialAlgs(self):
+        """
+        _initialAlgs
+        Picks the initial algorithms.
+        Chooses up to 8 algorithms to move from box 0 to box 2
+        """
+        for i in range(min(self.boxes[0].length(), 8)): # TODO - remove magic number
             self._move(self.boxes[0].getAlgorithm(), 0, 2)
