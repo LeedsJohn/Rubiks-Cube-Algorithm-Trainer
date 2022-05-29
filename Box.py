@@ -12,13 +12,12 @@ class Box:
     def __init__(self):
         self.algorithms = []
     
-    def pop(self, index):
+    def erase(self, alg):
         """
-        pop()
-        Receives an index to remove from the algorithms (list)
-        Returns the algorithm
+        erase()
+        Receives an algorithm to remove from the algorithms (list)
         """
-        return self.algorithms.pop(index)
+        self.algorithms.remove(alg)
     
     def add(self, algorithm):
         """
@@ -40,12 +39,28 @@ class Box:
         Returns a randomly selected algorithm
         """
         return random.choice(self.algorithms)
+    
+    def getMinAlgorithm(self):
+        """
+        getMinAlgorithm
+        Returns the algorithm with the minimum turnsUntilShow
+        """
+        minTurns = self.algorithms[0].getTurnsUntilShow()
+        minAlg = self.algorithms[0]
 
-    def getFirstAlgorithmName(self):
+        for alg in self.algorithms:
+            if alg.getTurnsUntilShow() < minTurns:
+                minTurns = alg.getTurnsUntilShow()
+                minAlg = alg
+        return minAlg
+
+    def urgentShowExists(self):
         """
-        getFirstAlgorithmName
-        Returns the name of the first algorithm from the algorithm list
+        urgentShowExists
+        Returns true if there is an algorithm in the box
+        where turnsUntilShow <= 0
         """
-        if self.algorithms:
-            return self.algorithms[0].getName()
-        return ""
+        for alg in self.algorithms:
+            if alg.getTurnsUntilShow() <= 0:
+                return True
+        return False

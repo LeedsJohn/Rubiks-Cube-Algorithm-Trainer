@@ -7,7 +7,7 @@ Contains a class Algorithm
 import random # select random scramble
 
 class Algorithm:
-    def __init__(self, name, scrambles):
+    def __init__(self, name, scrambles, turnsUntilShow = False):
         """
         Constructor
         Receives the name of the algorithm (string)
@@ -16,7 +16,10 @@ class Algorithm:
         self.name = name
         self.scrambles = scrambles
         self.streak = 0
-        self.turnsUntilShow = None
+        if not turnsUntilShow:
+            self.turnsUntilShow = None
+        else:
+            self.turnsUntilShow = random.randrange(1, 4)
 
     def increment(self):
         """
@@ -28,11 +31,16 @@ class Algorithm:
         if self.turnsUntilShow:
             self.turnsUntilShow -= 1
     
-    def reset(self):
+    def reset(self, wrongAns = True):
         """
-        Sets streak to 0
+        Sets streak to 0 and turnsUntilShow to a random number between
+        1 and 3
         """
         self.streak = 0
+        if wrongAns:
+            self.turnsUntilShow = random.randrange(1, 4)
+        else:
+            self.turnsUntilShow = None
 
     # GETTERS
     def getName(self):
