@@ -19,7 +19,7 @@ class Algorithm:
         if not turnsUntilShow:
             self.turnsUntilShow = None
         else:
-            self.turnsUntilShow = random.randrange(1, 4)
+            self.turnsUntilShow = random.randrange(2, 5)
 
     def incrementStreak(self):
         """
