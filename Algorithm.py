@@ -43,7 +43,7 @@ class Algorithm:
         """
         self.streak = 0
         if wrongAns:
-            self.turnsUntilShow = random.randrange(1, 4)
+            self.turnsUntilShow = random.randrange(2, 5)
         else:
             self.turnsUntilShow = None
 
