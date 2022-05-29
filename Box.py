@@ -26,6 +26,13 @@ class Box:
         """
         self.algorithms.append(algorithm)
     
+    def pop(self):
+        """
+        pop()
+        Calls pop on algorithms
+        """
+        self.algorithms.pop()
+
     def length(self):
         """
         length
@@ -72,3 +79,10 @@ class Box:
         """
         for alg in self.algorithms:
             alg.decrementTurnsUntilShow()
+
+    def shuffle(self):
+        """
+        shuffle
+        Shuffles the algorithms
+        """
+        random.shuffle(self.algorithms)
