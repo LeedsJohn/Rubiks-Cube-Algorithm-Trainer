@@ -16,13 +16,17 @@ class Algorithm:
         self.name = name
         self.scrambles = scrambles
         self.streak = 0
+        self.turnsUntilShow = None
 
     def increment(self):
         """
         increment()
         Increases streak by 1
+        Decreases turnsUntilShow by 1 if applicable
         """
         self.streak += 1
+        if self.turnsUntilShow:
+            self.turnsUntilShow -= 1
     
     def reset(self):
         """
@@ -35,6 +39,8 @@ class Algorithm:
         return self.name
     def getStreak(self):
         return self.streak
+    def getTurnsUntilShow(self):
+        return self.turnsUntilShow
     def getScramble(self):
         """
         getScramble()
