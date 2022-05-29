@@ -17,7 +17,8 @@ class Box:
         erase()
         Receives an algorithm to remove from the algorithms (list)
         """
-        self.algorithms.remove(alg)
+        if alg in self.algorithms:
+            self.algorithms.remove(alg)
     
     def add(self, algorithm):
         """
@@ -31,7 +32,7 @@ class Box:
         pop()
         Calls pop on algorithms
         """
-        self.algorithms.pop()
+        return self.algorithms.pop()
 
     def length(self):
         """

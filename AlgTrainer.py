@@ -34,6 +34,7 @@ class AlgTrainer:
     def __init__(self, file_path):
         self.boxes = self._createBoxes(file_path)
         self._initialAlgs()
+        self.queuedAlgs = []
         # self.lastAlg = "" TODO add in this
 
     def playRound(self):
@@ -42,12 +43,14 @@ class AlgTrainer:
         Tests the user on one algorithm
         Returns True if the user has learned every algorithm
         """
+        print("Box lengths: ")
+        for i, box in enumerate(self.boxes):
+            print(f"Box {i}: {box.length()}")
         box, alg = self.pickAlg()
         if box == -1:
             return True
         if box == 4:
-            self._reviewSession()
-            return False
+            return self._reviewSession()
         print(alg.getScramble())
         incorrect = input(
             "Enter any character if you got the algorithm wrong: ")
@@ -57,14 +60,14 @@ class AlgTrainer:
         if incorrect:
             self.boxes[box].erase(alg)
             alg.reset()
-            self.boxes[box].add(alg)
+            self.boxes[1].add(alg)
         else:
             alg.incrementStreak()
             if box == 1 or box == 2:
                 alg.reset(wrongAns = False)
                 self._move(alg, box, box+1)
             elif box == 3 and alg.getStreak() == 3:
-                self.move(alg, 3, 4)
+                self._move(alg, 3, 4)
                 self._addNewAlg()
 
         self.boxes[1].passRound()
@@ -77,22 +80,38 @@ class AlgTrainer:
         (box, algorithm)
         """
         if self._noAlgsLeft():
-            return -1
-        elif self.boxes[4].length() == REVIEW_COUNT:
-            return 4
+            return (-1, 0)
+        elif self._triggerReview():
+            return (4, 0)
         elif self.boxes[1].urgentShowExists():
-            return (1, self.algorithms[1].getMinAlgorithm())
+            return (1, self.boxes[1].getMinAlgorithm())
         elif self.boxes[2].length() != 0 and self.boxes[3].length() == 0:
-            return (2, self.algorithms[2].getAlgorithm())
+            return (2, self.boxes[2].getAlgorithm())
         elif self.boxes[3].length() != 0 and self.boxes[2].length() == 0:
-            return (3, self.algorithms[3].getAlgorithm())
+            return (3, self.boxes[3].getAlgorithm())
         elif self.boxes[2].length() == 0 and self.boxes[3].length() == 0:
-            return (1, self.algorithms[1].getMinAlgorithm())
+            return (1, self.boxes[1].getMinAlgorithm())
 
         whichBox = random.randrange(0, 100)
         if whichBox < BOX_2_PERCENTAGE:
             return (2, self.boxes[2].getAlgorithm())
         return (3, self.boxes[3].getAlgorithm())
+
+    def _triggerReview(self):
+        """
+        _triggerReview
+        Returns true if a review session should be triggered
+        (len box 4 == REVIEW_COUNT, box 4 is the only box with
+        algorithms in it other than 4)
+        """
+        if self.boxes[4].length() == REVIEW_COUNT:
+            return True
+        for i in range(4):
+            if self.boxes[i].length() != 0:
+                return False
+        if self.boxes[4].length() != 0:
+            return True
+        return False
 
     def _noAlgsLeft(self):
         """
@@ -129,21 +148,23 @@ class AlgTrainer:
         Picks from queuedAlgorithms if there are any in that box
         Else, picks one from box 0
         """
-        if self.boxes[0]:
-            self._move(random.choice(self.boxes[0]), 0, 2)
+        if self.queuedAlgs:
+            self.boxes[2].add(self.queuedAlgs.pop())
+        elif self.boxes[0].length() != 0:
+            self._move(self.boxes[0].getAlgorithm(), 0, 2)
 
-    def _removeAlg(self):
+    def _removeAlg(self, count = 1):
         """
         _removeAlg
-        Takes an algorithm out of cycle
+        Takes an algorithm out of cycle and adds it to queued algorithms
+        Optional: receives a number of algorithms to remove
         Prefers to take an algorithm from box 2, then 1, then 3
         """
-        if self.boxes[2]:
-            self._move(self.boxes[2].getAlgorithm(), 2, 0)
-        elif self.boxes[1]:
-            self._move(self.boxes[1].getAlgorithm(), 1, 0)
-        elif self.boxes[3]:
-            self._move(self.boxes[3].getAlgorithm(), 3, 0)
+        for c in range(count):
+            for i in (2, 1, 3):
+                if self.boxes[i].length() != 0:
+                    self.queuedAlgs.append(self.boxes[i].pop())
+                    break
 
     def _reviewSession(self):
         """
@@ -152,18 +173,25 @@ class AlgTrainer:
         box 5 if answered correctly.
         """
         print("Review: ")
-        random.shuffle(self.boxes[4])
+        self.boxes[4].shuffle()
         incorrectAlgs = []
-        for alg in self.boxes[4]:
+        while self.boxes[4].length() != 0:
+            alg = self.boxes[4].pop()
             print(alg.getScramble())
             incorrect = input(
             "Enter any character if you got the algorithm wrong: ")
+            if incorrect == "X":
+                return True
+
             if incorrect:
                 incorrectAlgs.append(alg)
             else:
                 self._move(alg, 4, 5)
 
+        self._removeAlg(len(incorrectAlgs))
+
         for alg in incorrectAlgs:
+            alg.reset()
             self.boxes[1].add(alg)
 
     def _createBoxes(self, file_path):
@@ -172,12 +200,15 @@ class AlgTrainer:
         Loads the algorithms from file_path
         Creates the boxes and fills box 2 with up to 8 algorithms
         """
-        boxes = [Box.Box for i in range(6)]
+        boxes = [Box.Box() for i in range(6)]
         algs = {}
         with open(file_path) as f:
             algs = json.load(f)
+        
         for alg in algs:
-            boxes[0].add(Algorithm.Algorithm(alg, algs[alg]))
+            newAlg = Algorithm.Algorithm(alg, algs[alg])
+            boxes[0].add(newAlg)
+        boxes[0].shuffle()
         return boxes
 
     def _initialAlgs(self):
