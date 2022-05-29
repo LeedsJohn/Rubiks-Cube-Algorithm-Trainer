@@ -64,3 +64,11 @@ class Box:
             if alg.getTurnsUntilShow() <= 0:
                 return True
         return False
+
+    def passRound(self):
+        """
+        passRound
+        Subtracts 1 from every algorithms turnsUNtilShow
+        """
+        for alg in self.algorithms:
+            alg.decrementTurnsUntilShow()

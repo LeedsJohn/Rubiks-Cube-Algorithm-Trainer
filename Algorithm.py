@@ -21,13 +21,18 @@ class Algorithm:
         else:
             self.turnsUntilShow = random.randrange(1, 4)
 
-    def increment(self):
+    def incrementStreak(self):
         """
         increment()
         Increases streak by 1
-        Decreases turnsUntilShow by 1 if applicable
         """
         self.streak += 1
+
+    def decrementTurnsUntilShow(self):
+        """
+        decrementTurnsUntilShow
+        Decreases turnsUntilShow by 1
+        """
         if self.turnsUntilShow:
             self.turnsUntilShow -= 1
     
